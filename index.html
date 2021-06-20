@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Banano Mass Payment Sender">
+  <meta name="author" content="Pramono Utomo">
+
+  <title>BMPS - Banano Mass Payment Sender</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="css/modern-business.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html"><img src="css/ban_logo.png"> BMPS</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="https://banano.cc">Banano.cc</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://public.banano.live">Public Nodes List</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownBlog" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Banano.id
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownBlog">
+              <a class="dropdown-item" href="https://portal.banano.id">Portal</a>
+              <a class="dropdown-item" href="https://banano.id/pay">Accept Payment</a>
+              <a class="dropdown-item" href="https://banano.id/vanity">Vanity Address</a>
+              <a class="dropdown-item" href="https://banano.id/pos">Point of Sale</a>
+              <a class="dropdown-item" href="https://banano.id/infaq">ID Donation Tracker</a>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://t.me/pramonoutomo">Contact Us</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <div class="container">
+
+    <!-- Page Heading/Breadcrumbs -->
+    <h1 class="mt-4 mb-3">Mass Payment Sender
+      <small>v.1.0.0
+      </small>
+    </h1>
+
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="#">How To Use BMPS?</a>
+      </li>
+    </ol>
+
+    <div class="row">
+
+      <!-- Post Content Column -->
+      <div class="col-lg-8">
+
+        <!-- Preview Image -->
+        <img class="img-fluid rounded" src="https://placehold.it/900x300" alt="">
+
+        <hr>
+
+        <!-- New Session -->
+        <p align="center" style="display:block;" id="part_1"><button class="btn btn-primary" data-toggle="modal" data-target="#start" id="btn_start">Connect To Public Nodes</button></p>
+        <hr>
+      <div style="display:none;" id="part_2">
+        <!-- Post Content -->
+        <p class="lead">
+        <form id="massPaymentForm" action="process.php" method="post"  target="blank">
+          <div class="control-group form-group">
+            <div class="controls">
+              <label>Wallet ID:</label>
+              <input type="text" class="form-control" id="wallet_id" name="wallet_id" readonly="readonly" required placeholder="-- Generated Automatically After Import SEED --">
+              <p class="help-block">no need to save this, this wallet id is the only data saved to my server. it's used for auto delete script, so the public nodes you're using are not full of abandoned account.</p>
+            </div>
+          </div>
+          <div class="control-group form-group">
+            <div class="controls">
+              <label>SEED:</label>
+              <div class="input-group">
+	              <input type="text" class="form-control" id="wallet_seed" required>
+	              <span class="input-group-btn">
+	                <button class="btn btn-secondary" type="button" onclick="showSeedQR();" id="btn_qrseed" readonly="readonly">Show QR</button>
+	              </span>
+              </div>
+              <p class="help-block">save this seed, use kalium/vault wallet to get your banano back. you can also use your own seed if you want <!--(if you want to use vanity address used to send your mass payment)-->. please note this can't be changed after importing seed.</p>
+            </div>
+          </div>
+          <hr>
+          <p align="center"><button type="button" class="btn btn-primary" id="btn_import" onclick="setNewSeed();">Import Banano SEED</button></p>
+          <p id="notify_text" align="center"></p>
+          <hr>
+          <p align="center"><b>----------------- Sender -----------------</b></p>
+          <hr>
+          <div class="control-group form-group">
+            <div class="controls">
+              <label>Sender Address:</label>
+              <div class="input-group">
+	              <input type="text" class="form-control" id="wallet_sender" name="wallet_sender" readonly="" required>
+	              <span class="input-group-btn">
+	                <button class="btn btn-secondary" type="button" onclick="showAddressQR();" data-toggle="popover" data-trigger="focus" data-placement="bottom" title="QR Code" id="btn_qraddess" readonly="readonly"  style="display:none;">Show QR</button>
+	              </span>
+              </div>
+              <p class="help-block">send your banano here, and then this address are used as sender for your mass payment.</p>
+            </div>
+          </div>
+          <hr>
+          <p align="center"><b>----------------- Receiver -----------------</b></p>
+          <hr>
+          <div class="control-group form-group">
+            <div class="controls">
+              <!--
+              <button class="btn btn-small btn-warning text-white">download format</button> <button class="btn btn-small btn-warning text-white">upload address</button> 
+              <br /><br />--><label>Receiver Address: (<b><i>one address per line, format: address|amount</i></b>)</label>
+              
+              <textarea rows="10" cols="100" class="form-control" id="wallet_receiver" name="wallet_receiver" required placeholder="ban_1address|19"></textarea>
+              <p class="help-block">only support minimum 1 ban to send, it's to make new people not getting confused on too many 0 (zero) char after the amount to be sended.</p>
+            </div>
+          </div>
+
+          <input type="checkbox" id="donation_dev" name="donation_dev" checked="checked"> add 1 BAN to be donated into script developer.
+
+          <br /><br />
+          <!-- For success/fail messages -->
+          <button type="submit" class="btn btn-success">Start Mass Payment</button>
+
+          <div id="notification_success"></div>
+        </p>
+
+      <br /><br /><br />
+      </div>
+
+    </div> <!-- end of part 2 -->
+
+
+        <!-- Modal -->
+      <div class="modal fade" id="start" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Configure Your Session</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="control-group form-group">
+                  <div class="controls">
+                    <label>Nodes:</label>
+                    <input type="text" class="form-control" id="nodes_address" name="nodes" readonly="readonly" value="https://nodes.banano.id/api.php">
+                    <p align="justify"><small>Since using this script will lead to a public nodes getting spammed by unused wallet id. So i decided to only allow this script runs on my own public bananodes (Banano.id), if you want to use this script on your own server and change the nodes address (or use your own nodes), simply forks it on my github :)</small></p>
+                    <p class="help-block">also check out <a href="https://public.banano.live" target="blank">https://public.banano.live</a> for more free public banano nodes.</p>
+                    <p id="nodes_text"></p>
+                  </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" onclick="connect();" id="btn_connect">Connect</button>
+              <button type="button" class="btn btn-secondary" style="display:none;" data-dismiss="modal" id="btn_continue">Continue</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      </form>
+
+
+    <!-- Modal Waiting -->
+    <div class="modal fade" id="waiting" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Processing Data</h5>
+            </div>
+            <div class="modal-body">
+              <div class="control-group form-group">
+                  Please wait while the script process your request.
+              </div>
+            </div>
+            <div class="modal-footer">
+              
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Right -->
+      <div class="col-md-4">
+
+        <!-- Withdraw Widget -->
+        <div class="card mb-4">
+          <h5 class="card-header">Balance</h5>
+          <div class="card-body">
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="Wallet Not Ready" readonly="" id="wallet_balances"><input type="text" class="form-control" readonly="" style="display:none;" id="wallet_balances2"><br /><br />
+            </div>
+            <div class="input-group">
+              <span class="input-group-btn">
+                <button class="btn btn-success" type="button" onclick="alert('Use kalium, click on top left menu/gear icon, click on load from paper wallet, select Scan QR Code, on this pages click on Show QR right side the seed textbox, scan it with kalium and your remaining banano will sent back to you. :cheers:');">Withdraw</button>
+                <button class="btn btn-primary" type="button" onclick="getBalances();">Refresh</button>
+              </span>
+            </div>
+
+              <i>updated every minutes</i><br />
+          </div>
+        </div>
+
+        <!-- Tip Widget -->
+        <div class="card my-4">
+          <h5 class="card-header">Warning!</h5>
+          <div class="card-body" style="color:red;">
+            Don't refresh this pages if you still have banano left.<br />
+            We didn't save any seed and also automatically delete the wallet id, so you may lose it if you didn't save / backup your seed generated here.
+            <p align="center"></p>
+          </div>
+        </div>
+
+        <!-- Status Widget -->
+        <div class="card my-4">
+          <h5 class="card-header">BMPS Status</h5>
+          <div class="card-body">
+            Nodes Connected <b class="text-danger" id="status_nodes">x</b><br />
+            Wallet Ready <b class="text-danger" id="status_wallet">x</b><br />
+            <p align="center"></p>
+          </div>
+        </div>
+
+        <!-- Donation Widget -->
+        <div class="card my-4">
+          <h5 class="card-header">Donation</h5>
+          <div class="card-body">
+            If you think this tools was useful for you, you can buy me a cola :)
+            <p align="center"></p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    <!-- /.row -->
+  </div>
+  <!-- /.container -->
+
+      <!-- MODAL QR Seed -->
+      <div class="modal fade" id="seedQRmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">SEED QR</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="control-group form-group">
+                  <div class="controls">
+                    <p align="center">
+                      <img src="https://placehold.it/150x150?text=SEED+DATA" id="seedQRimage">
+                    </p>
+                    <p class="help-block">always backup this seed data! if you lose it, you lose all access to all balance left.</p>
+                    <p id="seedQR_text">you can use <a href="https://kalium.banano.cc" target="blank">KALIUM</a> to scan this qr and import/swipe the wallet generated.</p>
+                  </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" style="display:none;" data-dismiss="modal" id="btn_continue">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL Address SEED -->
+      <div class="modal fade" id="walletQRmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Address QR</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="control-group form-group">
+                  <div class="controls">
+                    <p align="center">
+                      <a href="#" id="kaliumQRlink"><img src="https://placehold.it/150x150?text=SEED+DATA" id="addressQRimage"></a>
+                    </p>
+                    <p class="help-block" align="center">Send total amount here.</p>
+                    <p id="walletQR_text">you can use <a href="https://kalium.banano.cc" target="blank">KALIUM</a> to scan address above. or <a href="#" id="vaultQRlink" target="blank">click here</a> if you want to pay via bananovault.</p>
+                  </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" style="display:none;" data-dismiss="modal" id="btn_continue">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+			<!-- MODAL -->
+			<div class="modal fade" id="massPaymentModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="exampleModalLabel">Banano Mass Payment Sender</h5>
+			      </div>
+			      <div class="modal-body">
+			        <div class="control-group form-group">
+			            <div class="controls">
+			              <p align="left">
+                      Total Ban Amount Needed: <b id="text_totalban1"></b> (<b id="text_totaladdress"></b>)<br />
+                      Total Ban On Account: <b id="text_totalban2"></b><br />
+			              	Balance Left After Transaction: <b id="text_banleft"></b><br />
+			              </p>
+                    <p id="process_text"></p>
+                    <p id="processbro" align="center">
+                      <button type="button" class="btn btn-secondary" onclick="start_process();" id="btn_startmasspayment" style="display:none;">Start Mass Payment</button>
+                    </p>
+			              <p class="help-block">always backup wallet seed! click the button above only once :)</p>
+			            </div>
+			        </div>
+			      </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary" style="display:none;" data-dismiss="modal" id="btn_continue">Close</button>
+			      </div>
+			    </div>
+			  </div>
+			</div>
+
+  <!-- Footer -->
+  <footer class="py-5 bg-dark">
+    <div class="container">
+      <p class="m-0 text-center text-white">Copyright <a href="https://pramonoutomo.com" target="blank">&copy;Pramono Utomo 2021</a></p>
+    </div>
+    <!-- /.container -->
+  </footer>
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script type="text/javascript">
+  	function connect(){
+  		document.getElementById("btn_connect").style.display = "none";
+  		document.getElementById("btn_continue").style.display = "none";
+			var nodes_address = document.getElementById("nodes_address").value;
+			document.getElementById("nodes_text").innerHTML="<b class='text-warning'>Trying to connect...</b>";
+			
+			if (nodes_address == null || nodes_address == "") {
+				document.getElementById("nodes_text").innerHTML="<b class='text-danger'>Error! Nodes Address not found.</b>";
+				alert("Oops can't find nodes address.");
+				return false;
+			}else{
+				//proses tambah data//
+				/* Script Tambah Data - w3schools.com */
+				$.ajax({
+				type: 'POST', // The request type POST or GET
+				url: "ajax_connect.php", // The URL to the controller
+				dataType: 'json', // The data type json, html, img etc...
+				async: true, // async or sync
+				
+            	/* The main request body */
+				data: {
+					action: "connect", // The action that we are catching at controller.php
+					nodes: nodes_address
+					
+				},
+				success: function (data) {
+					/* We are getting here, if everything is ok */
+					//alert(data)
+					if(data.status==0){
+						document.getElementById("nodes_text").innerHTML="<b class='text-danger'>Error! Nodes are not ready / offline.</b>";
+						document.getElementById("status_nodes").innerHTML="x";
+						document.getElementById("status_nodes").className ="text-danger";
+	  					document.getElementById("btn_connect").style.display = "block";
+					}else{
+						document.getElementById("nodes_text").innerHTML="<b class='text-success'>Nodes connected.<br />Blocks Count: "+data.xdata.count+"<br />Blocks Unchecked: "+data.xdata.unchecked+"<br />Blocks Confirmed: "+data.xdata.cemented+"<br /></b>";
+						  document.getElementById("status_nodes").innerHTML="✔";
+						  document.getElementById("status_nodes").className ="text-success";
+              document.getElementById("btn_continue").style.display = "block";
+              document.getElementById("part_1").style.display = "none";
+	  					document.getElementById("part_2").style.display = "block";
+	  					document.getElementById("btn_start").disabled = true;
+	  					document.querySelector('#btn_start').textContent = 'Connected';
+              document.getElementById("btn_qrseed").readOnly = false;
+
+	  					//create random seed
+	  					randomseed();
+					}
+					
+				},
+				error: function (XMLHttpRequest, textStatus, errorThrown) {
+					/* If something goes wrong we're comming here */
+					document.getElementById("nodes_text").innerHTML="<b class='text-danger'>Error! Can't connect to this nodes.</b>";
+					document.getElementById("status_nodes").innerHTML="x";
+					document.getElementById("status_nodes").className ="text-danger";
+  					document.getElementById("btn_connect").style.display = "block";
+				}
+				});
+			}
+			
+		}
+    function setNewSeed(){
+      $('#waiting').modal('show');
+      document.getElementById("btn_import").style.display = "none";
+      var nodes_address = document.getElementById("nodes_address").value; //nodes address
+      var wallet_seed = document.getElementById("wallet_seed").value; //nodes address
+
+      if (nodes_address == null || nodes_address == "") {
+        document.getElementById("nodes_text").innerHTML="<b class='text-danger'>Error! Nodes Address not found.</b>";
+        alert("Oops can't find nodes address.");
+        return false;
+      }else{
+        //proses tambah data//
+        /* Script Tambah Data - w3schools.com */
+        $.ajax({
+        type: 'POST', // The request type POST or GET
+        url: "ajax_connect.php", // The URL to the controller
+        dataType: 'json', // The data type json, html, img etc...
+        async: true, // async or sync
+        
+              /* The main request body */
+        data: {
+          action: "import", // The action that we are catching at controller.php
+          nodes: nodes_address,
+          seed: wallet_seed
+          
+        },
+        success: function (data) {
+          /* We are getting here, if everything is ok */
+          //alert(data)
+          if(data.status==0){
+            $('#waiting').modal('hide');
+            document.getElementById("btn_import").style.display = "block";
+            document.getElementById("notify_text").innerHTML="<b class='text-danger'>Error! "+data.msg+"</b>";
+          }else{
+            $('#waiting').modal('hide');
+            document.getElementById("wallet_id").value=data.walletid;
+            document.getElementById("wallet_sender").value=data.wallet;
+            document.getElementById("kaliumQRlink").href="ban:"+data.wallet;
+            document.getElementById("vaultQRlink").href="https://vault.banano.cc/send?to="+data.wallet;
+            document.getElementById("wallet_seed").readOnly = true;
+            document.getElementById("wallet_sender").readOnly = true;
+            document.getElementById("btn_qraddess").style.display = "block";
+            document.getElementById("btn_qraddess").readOnly = false;
+            document.getElementById("notify_text").innerHTML="<b class='text-success'>SEED imported successfully.<br />Now you can send some $ban to the address below, enter receiver wallet and amount $ban to send (one address + amount for each line).<br />Clicking Start Mass Payment Button are opening new tab to process, you can withdraw the remaining balances after the process completed.</b>";
+              document.getElementById("status_wallet").innerHTML="✔";
+              document.getElementById("status_wallet").className ="text-success";
+
+              //get wallets, and refresh every 1 minutes
+              getBalances();
+              loopBalances();
+          }
+          
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+          /* If something goes wrong we're comming here */
+          $('#waiting').modal('hide');
+          document.getElementById("btn_import").style.display = "block";
+        }
+        });
+      }
+
+    }
+    function process(){
+      //wait for checking the data
+      getBalances();
+      $('#waiting').modal('show');
+      var nodes_address = document.getElementById("nodes_address").value;
+      var walletID = document.getElementById("wallet_id").value;
+      var senderID = document.getElementById("wallet_sender").value;
+      var balancess = document.getElementById("wallet_balances2").value;
+      var AddressPlusAmount = document.getElementById("wallet_receiver").value;
+      var AddressPlusAmountEachLine = AddressPlusAmount.split('\n');
+      var totalamount=0;
+      for(var i = 0;i < AddressPlusAmountEachLine.length;i++){
+        var receiver = AddressPlusAmountEachLine.split("|");
+        if(i==0){
+          totalamount = receiver[i][1];
+        }else{
+          totalamount = totalamount+receiver[i][1];
+        }
+        
+      }
+      var amountLeft = balancess-totalamount;
+      //hide waiting modal
+      $('#waiting').modal('hide');
+      //open modal mass payment
+      $('#massPaymentModal').modal('show');
+      //notify on how much total banano needed + count total address
+      document.getElementById("text_totalban1").innerHTML=totalamount+" BAN";
+      document.getElementById("text_totalban2").innerHTML=balancess;
+      document.getElementById("text_totaladdress").innerHTML=i+" Receiver";
+      document.getElementById("text_banleft").innerHTML=amountLeft+" BAN";
+      //if amountLeft is negative = notify the mass payment may be error / interupted when there is not enough balance left on the sender wallet. 
+      if(amountLeft<0){
+        document.getElementById("process_text").innerHTML="<b class='text-danger'>Mass payment may be error / interupted when there is not enough balance left on the sender wallet.</b>";
+      }
+      //display button send payment / submit form to process.php
+      document.getElementById("btn_startmasspayment").style.display = "block";
+
+    }
+    function getBalances(){
+      var wallets = document.getElementById("wallet_sender").value;
+      var nodes_address = document.getElementById("nodes_address").value; //nodes address
+      if (wallets == null || wallets == "") {
+        document.getElementById("notify_text").innerHTML="<b class='text-danger'>Wallet Address Not Found.</b>";
+        alert("No Wallet Address Found.");
+        return false;
+      }else{
+        //proses tambah data//
+        /* Script Tambah Data - w3schools.com */
+        $.ajax({
+        type: 'POST', // The request type POST or GET
+        url: "ajax_connect.php", // The URL to the controller
+        dataType: 'json', // The data type json, html, img etc...
+        async: true, // async or sync
+        
+              /* The main request body */
+        data: {
+          action: "getBalances", // The action that we are catching at controller.php
+          nodes: nodes_address,
+          wallets: wallets
+          
+        },
+        success: function (data) {
+          /* We are getting here, if everything is ok */
+          //alert(data)
+          if(data.status==0){
+            document.getElementById("notify_text").innerHTML="<b class='text-danger'>Error! "+data.msg+"</b>";
+          }else{
+            document.getElementById("wallet_balances").value=data.balance+" BAN (+"+data.pending+")";
+            document.getElementById("wallet_balances2").value=data.balance;
+            document.getElementById("text_totalban2").value=data.balance+" BAN";
+            //document.getElementById("notify_text").innerHTML="Balances Updated";
+          }
+          
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+          /* If something goes wrong we're comming here */
+          $('#waiting').modal('hide');
+          document.getElementById("btn_import").style.display = "block";
+        }
+        });
+      }
+    }
+    function loopBalances(){
+      window.setInterval(function(){
+        getBalances();
+      }, 60000);
+    }
+  </script>
+  <!-- file needed to generate seed -->
+  <script type="text/javascript" src="js/chriscohoat_rai-wallet_functions_2018-03-06.js"></script>
+  <script type="text/javascript" src="js/dcposch_blakejs_2018-03-06.js"></script>
+  <script type="text/javascript" src="js/jaimehgb_tweetnacl-js_2018-03-06.js"></script>
+  <script type="text/javascript" src="js/termhn_nano-base32_2018-03-06.js"></script>
+  <script type="text/javascript">  /* SCRIPT BELOW FOR CREATING SEED */
+ 	
+	function hexToBytes(hex) { // why is this here? probably duplicate of hex_uint8
+	    for (var bytes = [], c = 0; c < hex.length; c += 2)
+	    bytes.push(parseInt(hex.substr(c, 2), 16));
+	    return bytes;
+	}
+
+	// generates a new random seed and proceed to convert 
+	function randomseed() {
+		var seed = nacl.randomBytes(32);
+		var seedhex = uint8_hex(seed);
+		document.getElementById("wallet_seed").value = seedhex;
+		//sanitizeandconvert(seedhex,'fieldseed');
+	}
+
+	// generates a new random private key and proceed to convert 
+	function randomprivatekey() {
+		var privatekey = nacl.randomBytes(32);
+		var privatekeyhex = uint8_hex(privatekey);
+		document.getElementById("fieldprivatekey").value = privatekeyhex;
+		//sanitizeandconvert(privatekeyhex,'fieldprivatekey');
+	}
+
+	// generates a new random public key and proceed to convert 
+	function randompublickey() {
+		var publickey = nacl.randomBytes(32);
+		var publickeyhex = uint8_hex(publickey);
+		document.getElementById("fieldpublickey").value = publickeyhex;
+		//sanitizeandconvert(publickeyhex,'fieldpublickey');
+	}
+
+		
+	//this is where the conversion magic happens. 
+	function convert(string, field) {
+	    if (field == 'fieldseed' || field == 'fieldindex') {  
+			if(document.getElementById("fieldseed").value.length == 64) { // will be skipped if only a index number has been entered
+				var seed = document.getElementById("fieldseed").value; //will take each 2 HEX chars each and make it a byte from 0-255.  
+				seed = hex_uint8(seed); //will take each 2 HEX chars each and make it a byte from 0-255.  
+				var index = document.getElementById("fieldindex").value;
+				var indexbytes = hex_uint8(dec2hex(index, 4));  
+				var context = blake2bInit(32);
+				blake2bUpdate(context, seed);
+				blake2bUpdate(context, indexbytes);
+				var resultingprivkey = blake2bFinal(context);
+				document.getElementById("fieldprivatekey").value = uint8_hex(resultingprivkey);
+				field = 'fieldprivatekey';
+				}
+	    } // end seed input conversion 
+
+
+	    if (field == 'fieldprivatekey') {
+	        var privatekey = document.getElementById("fieldprivatekey").value;
+	        var privatekeyuint8 = hex_uint8(privatekey);
+	        var publickeyhex = uint8_hex(nacl.sign.keyPair.fromSecretKey(privatekeyuint8).publicKey);
+	        document.getElementById("fieldpublickey").value = publickeyhex;
+	        var account = accountFromHexKey(publickeyhex);
+	        document.getElementById("fieldaddress").value = account;
+	    }
+
+
+	    if (field == 'fieldpublickey') {
+	        document.getElementById("fieldprivatekey").value = '-';
+	        var publickeyhex = document.getElementById("fieldpublickey").value;
+	        try {
+	            var account = accountFromHexKey(publickeyhex);
+	            document.getElementById("fieldaddress").value = account;
+	        } catch (err) {
+	            alert('Input error in public key field: ' + err);
+	        } 
+	    }
+
+	    if (field == 'fieldaddress') {
+	        document.getElementById("fieldprivatekey").value = '-';
+	        var address = document.getElementById("fieldaddress").value;
+
+	        try {
+	            document.getElementById("fieldpublickey").value = keyFromAccount(address);
+	        } catch (err) {
+	            alert('Input error in address field: ' + err);
+	        }
+	    }
+
+	}	
+
+	// automatic remove of dash on focus
+	function removedash(fieldobject) {
+		if(fieldobject.value == '-') {fieldobject.value='';}
+	}
+
+	// this function is optional and does nothing else than make some input sanitation and change visuals for errors. It's a horrible mess, some operations are even redundant, so don't bother looking at it. It works as intended at least. If the app behaviour seems odd to you, then it's not a bug, it's my way of thinking UX.
+	function sanitizeandconvert(string, field) {
+	    if (field == 'fieldseed' || field == 'fieldprivatekey' || field == 'fieldpublickey') {
+	        document.getElementById(field).value = document.getElementById(field).value.replace(/[^0-9A-F\.]/gi, '').toUpperCase().substr(0,64) ;; // delete everything non-hex and simulate maxlength(64) but allow bigger inputs in case someone has additional spaces
+	    }
+	    if (field == 'fieldseed' && !(parseInt(document.getElementById("fieldindex").value, 10) >= 0)) {
+	        document.getElementById("fieldindex").value = 0;
+	    }
+	    if (field == 'fieldindex') {
+	        index = document.getElementById("fieldindex").value.replace(/[^0-9\.]/g, ''); // delete all non-digits and then leading zeroes with parseint
+	        if (parseInt(index, 10) > 4294967295) {
+	            document.getElementById("fieldindex").value = 4294967295;
+	        } else if (parseInt(index, 10) == index) {
+
+	            document.getElementById("fieldindex").value = parseInt(index, 10); // parseint only if no chars entered to not wipe the whole fielst
+	        } else {
+	            document.getElementById("fieldindex").value = index;
+	        }
+	        if (document.getElementById("fieldseed").value.length != 64) {
+	            document.getElementById("fieldprivatekey").value = '-';
+	            document.getElementById("fieldpublickey").value = '-';
+	            document.getElementById("fieldaddress").value = '-';
+	        }
+	    }
+	    if (field != 'fieldseed' && field != 'fieldindex') {
+	        document.getElementById("fieldseed").value = '-';
+	        document.getElementById("fieldindex").value = '-';
+	    }
+	   // if (string == '') {  bugfix 240418
+	    if (document.getElementById(field).value == '') {
+	        return; // don't do anything in case the whole field was cleared. To do: Wipe other fields 
+	    }
+	    if (document.getElementById("fieldseed").value.length == 64 || document.getElementById("fieldseed").value == '-') { // fix 
+	        document.getElementById('fieldseed').classList.remove("inputerrorborder");
+	        document.getElementById('fieldprivatekey').classList.remove("inputerrorborder"); //test
+	        document.getElementById('fieldpublickey').classList.remove("inputerrorborder"); //test
+	    }
+	    if (field == 'fieldseed' && document.getElementById('fieldseed').value.length != 64) {
+	        document.getElementById('fieldseed').classList.add("inputerrorborder");
+	        document.getElementById("fieldprivatekey").value = '-';
+	        document.getElementById("fieldpublickey").value = '-';
+	        document.getElementById("fieldaddress").value = '-';
+	    } else if (field == 'fieldseed' && document.getElementById('fieldseed').value.length == 64) {
+	        document.getElementById('fieldseed').classList.remove("inputerrorborder");
+	    }
+	    if (field == 'fieldindex' && document.getElementById('fieldseed').value.length != 64) {
+	        document.getElementById('fieldseed').classList.add("inputerrorborder");
+	        document.getElementById("fieldprivatekey").value = '-';
+	        document.getElementById("fieldpublickey").value = '-';
+	        document.getElementById("fieldaddress").value = '-';
+	        return;
+	    } else if (field == 'fieldindex' && document.getElementById('fieldseed').value.length == 64) {
+	        document.getElementById('fieldseed').classList.remove("inputerrorborder");
+	    }
+	    if (field == 'fieldprivatekey' && document.getElementById('fieldprivatekey').value.length != 64) {
+	        document.getElementById('fieldprivatekey').classList.add("inputerrorborder");
+	        document.getElementById("fieldpublickey").value = '-';
+	        document.getElementById("fieldaddress").value = '-';
+	    } else {
+	        document.getElementById('fieldprivatekey').classList.remove("inputerrorborder");
+	    }
+	    if (field == 'fieldpublickey' && document.getElementById('fieldpublickey').value.length != 64) {
+	        document.getElementById('fieldpublickey').classList.add("inputerrorborder");
+	        document.getElementById("fieldprivatekey").value = '-';
+	        document.getElementById("fieldaddress").value = '-';
+	    } else {
+	        document.getElementById('fieldpublickey').classList.remove("inputerrorborder");
+	    }
+		
+	      if ( field == 'fieldaddress' ) {
+		document.getElementById('fieldaddress').value = document.getElementById('fieldaddress').value.toLowerCase();
+		var rawaccount = document.getElementById('fieldaddress').value;
+	      if (  
+	  ((rawaccount.startsWith('nano_1') || rawaccount.startsWith('nano_3')) && (rawaccount.length == 65))   ||
+	  ((rawaccount.startsWith('ban_1') || rawaccount.startsWith('ban_3')) && (rawaccount.length == 64))   ||
+	  ((rawaccount.startsWith('xrb_1') || rawaccount.startsWith('xrb_3')) && (rawaccount.length == 64))
+		) { 
+	        document.getElementById('fieldaddress').classList.remove("inputerrorborder");
+	    } else {
+	        document.getElementById('fieldaddress').classList.add("inputerrorborder");
+	        document.getElementById("fieldseed").value = '-';
+	        document.getElementById("fieldprivatekey").value = '-';
+	        document.getElementById("fieldpublickey").value = '-';
+			return;
+			
+		  } }
+	    if (field != 'fieldindex' && field != 'fieldaddress' && document.getElementById(field).value.length != 64) {
+	        return;
+	    }
+	    document.getElementById(field).classList.remove("inputerrorborder");
+	    convert(document.getElementById(field).value, field);
+	}
+
+
+	// last bugfixes and improvements: 
+	// always use real field value, not function argument
+	// allow paste of more than 64 chars before sanitation
+	// remove dashes on focus
+	// add copy buttons 
+
+	</script>
+
+	<script type="text/javascript">
+  function showSeedQR(){
+    var seed =  document.getElementById("wallet_seed").value;
+    document.getElementById("seedQRimage").src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+seed;
+    $('#seedQRmodal').modal('show');
+  }
+	function showAddressQR(){
+		var wallet =  document.getElementById("wallet_sender").value;
+		document.getElementById("addressQRimage").src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+wallet;
+		$('#walletQRmodal').modal('show');
+	}
+	</script>
+</body>
+
+</html>
